@@ -25,7 +25,7 @@ def create_top250_table(cursor: sqlite3.Cursor):
     imdb_rating_count INTEGER);''')
 
 
-def create_ratings_table(cursor: sqlite3.Cursor):
+def create_tv_ratings_table(cursor: sqlite3.Cursor):
     cursor.execute('''CREATE TABLE IF NOT EXISTS show_ratings(
     ratings_key INTEGER PRIMARY KEY,
     imdb_ttcode TEXT NOT NULL,

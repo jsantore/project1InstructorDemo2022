@@ -13,7 +13,7 @@ def report_results(data_to_write: list):
 def main():
     connection, db_cursor = dataBaseStuff.open_db("project1db.sqlite")
     dataBaseStuff.create_top250_table(db_cursor)
-    dataBaseStuff.create_ratings_table(db_cursor)
+    dataBaseStuff.create_tv_ratings_table(db_cursor)
     top_show_data = api_data.get_top_250_data()
     top_show_data_for_db = api_data.prepare_top_250_data(top_show_data)
     dataBaseStuff.put_top_250_in_database(top_show_data_for_db, db_cursor)
