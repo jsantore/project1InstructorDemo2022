@@ -12,8 +12,54 @@ def close_db(connection: sqlite3.Connection):
     connection.close()
 
 
-def create_top250_table(cursor: sqlite3.Cursor):
+def create_top250TV_table(cursor: sqlite3.Cursor):
     cursor.execute('''CREATE TABLE IF NOT EXISTS top_show_data(
+    ttid TEXT PRIMARY KEY,
+    rank INTEGER DEFAULT 0,
+    title TEXT,
+    fulltitle TEXT,
+    year INTEGER,
+    image_url TEXT,
+    crew TEXT,
+    imdb_rating REAL,
+    imdb_rating_count INTEGER);''')
+
+
+def create_most_pop_tv_table(cursor: sqlite3.Cursor):
+    cursor.execute('''CREATE TABLE IF NOT EXISTS most_popular_shows(
+    ttid TEXT PRIMARY KEY,
+    rank INTEGER,
+    rankchange INTEGER DEFAULT 0,
+    title TEXT,
+    fulltitle TEXT,
+    year INTEGER,
+    image_url TEXT,
+    crew TEXT,
+    rating REAL,
+    ratingCount INTEGER);
+    ''')
+
+
+def create_most_pop_movie_table(cursor: sqlite3.Cursor):
+    cursor.execute('''CREATE TABLE IF NOT EXISTS most_popular_movies(
+    ttid TEXT PRIMARY KEY,
+    rank INTEGER,
+    rankchange INTEGER DEFAULT 0,
+    title TEXT,
+    fulltitle TEXT,
+    year INTEGER,
+    image_url TEXT,
+    crew TEXT,
+    rating REAL,
+    ratingCount INTEGER);
+    ''')
+
+
+def create_top250movie_table(cursor: sqlite3.Cursor):
+    # if I was trying to be clever, I would use the same table for top250 movies and top250 tv and just use an extra
+    # field in the database to mark it as movie or TV, but since most of you who are looking for this are looking for
+    # a straightforward solution we'll do it this way.
+    cursor.execute('''CREATE TABLE IF NOT EXISTS top_movie_data(
     ttid TEXT PRIMARY KEY,
     rank INTEGER DEFAULT 0,
     title TEXT,
@@ -59,10 +105,25 @@ def create_tv_ratings_table(cursor: sqlite3.Cursor):
     );''')
 
 
-def put_top_250_in_database(data_to_add: list[tuple], db_cursor: sqlite3.Cursor):
-    db_cursor.executemany("""INSERT INTO top_show_data(ttid, rank, title, fulltitle, year, image_url, crew, imdb_rating,
+def create_all_tables(db_cursor: sqlite3.Cursor):
+    create_top250TV_table(db_cursor)
+    create_tv_ratings_table(db_cursor)
+    create_top250movie_table(db_cursor)
+    create_most_pop_tv_table(db_cursor)
+    create_most_pop_movie_table(db_cursor)
+
+
+def put_top_250_in_database(table:str, data_to_add: list[tuple], db_cursor: sqlite3.Cursor):
+    db_cursor.executemany(f"""INSERT INTO {table}(ttid, rank, title, fulltitle, year, image_url, crew, imdb_rating,
     imdb_rating_count)
     VALUES(?,?,?,?,?,?,?,?,?)""", data_to_add)
+
+
+def put_most_popular_in_database(table:str, data_to_add: list[tuple], db_cursor: sqlite3.Cursor):
+    db_cursor.executemany(f"""INSERT INTO {table}(ttid, rank, rankchange, title, fulltitle, year, image_url, crew, rating,
+    ratingcount)
+    VALUES(?,?,?,?,?,?,?,?,?, ?)""", data_to_add)
+
 
 
 def put_in_wheel_of_time(db_cursor: sqlite3.Cursor):

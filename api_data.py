@@ -3,16 +3,28 @@ import secrets
 import sys
 
 
-def get_top_250_data() -> list[dict]:
-    api_query = f"https://imdb-api.com/en/API/Top250TVs/{secrets.secret_key}"
+def get_top_250_data(what_kind:str) -> list[dict]:
+    api_query = f"https://imdb-api.com/en/API/Top250{what_kind}s/{secrets.secret_key}"
     response = requests.get(api_query)
     if response.status_code != 200:  # if we don't get an ok response we have trouble
         print(f"Failed to get data, response code:{response.status_code} and error message: {response.reason} ")
         sys.exit(-1)
     # jsonresponse is a kinda useless dictionary, but the items element has what we need
     jsonresponse = response.json()
-    show_list = jsonresponse["items"]
-    return show_list
+    top250_list = jsonresponse["items"]
+    return top250_list
+
+
+def get_most_popular(type:str)->list[tuple]:
+    api_query = f"https://imdb-api.com/en/API/MostPopular{type}/{secrets.secret_key}"
+    response = requests.get(api_query)
+    if response.status_code != 200:  # if we don't get an ok response we have trouble
+        print(f"Failed to get data, response code:{response.status_code} and error message: {response.reason} ")
+        sys.exit(-1)
+    jsonresponse = response.json()
+    most_pop_list = jsonresponse["items"]
+    most_pop_ready = prepare_most_popular(most_pop_list)
+    return most_pop_ready
 
 
 def get_ratings(top_show_data: list[dict]) -> list[dict]:
@@ -39,9 +51,39 @@ def get_ratings(top_show_data: list[dict]) -> list[dict]:
     return results
 
 
-def prepare_top_250_data(top_show_data: list[dict]) -> list[tuple]:
+def prepare_most_popular(top_show_data: list[dict]) -> list[tuple]:
     data_for_database = []
     for show_data in top_show_data:
+        show_values = list(show_data.values())  # dict values is now an object that is almost a list, lets make it one
+        # now we have the values, but several of them are strings and I would like them to be numbers
+        # since python 3.7 dictionaries are guaranteed to be in insertion order
+        show_values[1] = int(show_values[1])  # convert rank to int
+        show_values[2] = rank_to_int(show_values[2]) #rank up down sometimes has bad data so handle it specially
+        show_values[4] = int(show_values[5])  # convert year to int
+        show_values[7] = rating_to_float(show_values[8])  # convert rating to float, some are '' and need to become 0
+        show_values[8] = int(show_values[9])  # convert rating count to int
+        # now covert the list of values to a tuple to easy insertion into the database
+        show_values = tuple(show_values)
+        data_for_database.append(show_values)
+    return data_for_database
+
+def rank_to_int(rank_val:str)->int:
+    try:
+        real_rank = int(rank_val)
+        return real_rank
+    except ValueError:
+        return 0
+
+def rating_to_float(rating:str)->float:
+    try:
+        real_rank = float(rating)
+        return real_rank
+    except ValueError:
+        return 0
+
+def prepare_top_250_data(most_popular_json:list[dict]) ->list[tuple]:
+    data_for_database = []
+    for show_data in most_popular_json:
         show_values = list(show_data.values())  # dict values is now an object that is almost a list, lets make it one
         # now we have the values, but several of them are strings and I would like them to be numbers
         # since python 3.7 dictionaries are guaranteed to be in insertion order

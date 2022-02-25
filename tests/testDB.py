@@ -15,7 +15,7 @@ def test_enter_data():
                         "", "Prof. Santore and many hardworking students", 9.2, 41)]
 
     connection, db_cursor = dataBaseStuff.open_db("testDatabase.sqlite")
-    dataBaseStuff.create_top250_table(db_cursor)
+    dataBaseStuff.create_top250TV_table(db_cursor)
     dataBaseStuff.put_top_250_in_database(test_data_entry, db_cursor)
     connection.commit()
     # this test in the next four lines wasn't technically required, but I wanted to demo the count feature
