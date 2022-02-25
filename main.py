@@ -25,9 +25,12 @@ def get_data_and_put_in_db(db_cursor:sqlite3.Cursor):
     dataBaseStuff.put_most_popular_in_database("most_popular_movies", most_pop_movies, db_cursor)
     dataBaseStuff.put_most_popular_in_database("most_popular_shows", most_pop_tv, db_cursor)
     dataBaseStuff.put_in_wheel_of_time(db_cursor)
+    big_mover_records = api_data.get_big_movers(most_pop_movies)
+    big_mover_ratings = api_data.get_big_mover_ratings(big_mover_records)
     ratings_data = api_data.get_ratings(top_show_data)
     db_ready_ratings_data = api_data.prepare_ratings_for_db(ratings_data)
     dataBaseStuff.put_ratings_into_db(db_ready_ratings_data, db_cursor)
+    dataBaseStuff.put_ratings_into_db(big_mover_ratings, db_cursor)
 
 
 def main():

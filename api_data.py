@@ -81,6 +81,33 @@ def rating_to_float(rating:str)->float:
     except ValueError:
         return 0
 
+def get_big_movers(popular_movies: list[tuple])->list[tuple]:
+    popular_movies.sort(key=get_sort_key, reverse=True)  # order the list by rankupdown with positive moves first
+    big_movers = []
+    big_movers.extend(popular_movies[:3])  # put the first three items from the sorted list into the final list
+    big_movers.append(popular_movies[-1])  # put the last item from the sorted list into the final list
+    return big_movers
+
+
+
+
+
+def get_big_mover_ratings(big_movers: list[tuple]) -> list[tuple]:
+    big_mover_rating_data = []
+    for mover in big_movers:
+        url = f"https://imdb-api.com/en/API/UserRatings/{secrets.secret_key}/{mover[0]}"  # the ttid is in position 0
+        response = requests.get(url)
+        if response.status_code != 200:
+            print(f"response code for {mover[3]} came back : {response.status_code}")
+            continue
+        big_mover_rating_data.append(response.json())
+    big_mover_rating_data = prepare_ratings_for_db(big_mover_rating_data)
+    return big_mover_rating_data
+
+
+def get_sort_key(item):
+    return item[2]  # rank up down is in index 2 of the tuple
+
 def prepare_top_250_data(most_popular_json:list[dict]) ->list[tuple]:
     data_for_database = []
     for show_data in most_popular_json:
