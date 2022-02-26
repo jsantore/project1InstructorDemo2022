@@ -3,7 +3,7 @@ import secrets
 import sys
 
 
-def get_top_250_data(what_kind:str) -> list[dict]:
+def get_top_250_data(what_kind: str) -> list[dict]:
     api_query = f"https://imdb-api.com/en/API/Top250{what_kind}s/{secrets.secret_key}"
     response = requests.get(api_query)
     if response.status_code != 200:  # if we don't get an ok response we have trouble
@@ -15,7 +15,7 @@ def get_top_250_data(what_kind:str) -> list[dict]:
     return top250_list
 
 
-def get_most_popular(type:str)->list[tuple]:
+def get_most_popular(type: str) -> list[tuple]:
     api_query = f"https://imdb-api.com/en/API/MostPopular{type}/{secrets.secret_key}"
     response = requests.get(api_query)
     if response.status_code != 200:  # if we don't get an ok response we have trouble
@@ -58,7 +58,7 @@ def prepare_most_popular(top_show_data: list[dict]) -> list[tuple]:
         # now we have the values, but several of them are strings and I would like them to be numbers
         # since python 3.7 dictionaries are guaranteed to be in insertion order
         show_values[1] = int(show_values[1])  # convert rank to int
-        show_values[2] = rank_to_int(show_values[2]) #rank up down sometimes has bad data so handle it specially
+        show_values[2] = rank_to_int(show_values[2])  # rank up down sometimes has bad data so handle it specially
         show_values[4] = int(show_values[5])  # convert year to int
         show_values[7] = rating_to_float(show_values[8])  # convert rating to float, some are '' and need to become 0
         show_values[8] = int(show_values[9])  # convert rating count to int
@@ -67,29 +67,29 @@ def prepare_most_popular(top_show_data: list[dict]) -> list[tuple]:
         data_for_database.append(show_values)
     return data_for_database
 
-def rank_to_int(rank_val:str)->int:
+
+def rank_to_int(rank_val: str) -> int:
     try:
         real_rank = int(rank_val)
         return real_rank
     except ValueError:
         return 0
 
-def rating_to_float(rating:str)->float:
+
+def rating_to_float(rating: str) -> float:
     try:
         real_rank = float(rating)
         return real_rank
     except ValueError:
         return 0
 
-def get_big_movers(popular_movies: list[tuple])->list[tuple]:
+
+def get_big_movers(popular_movies: list[tuple]) -> list[tuple]:
     popular_movies.sort(key=get_sort_key, reverse=True)  # order the list by rankupdown with positive moves first
     big_movers = []
     big_movers.extend(popular_movies[:3])  # put the first three items from the sorted list into the final list
     big_movers.append(popular_movies[-1])  # put the last item from the sorted list into the final list
     return big_movers
-
-
-
 
 
 def get_big_mover_ratings(big_movers: list[tuple]) -> list[tuple]:
@@ -106,9 +106,12 @@ def get_big_mover_ratings(big_movers: list[tuple]) -> list[tuple]:
 
 
 def get_sort_key(item):
+    if len(item) < 3:
+        raise ValueError
     return item[2]  # rank up down is in index 2 of the tuple
 
-def prepare_top_250_data(most_popular_json:list[dict]) ->list[tuple]:
+
+def prepare_top_250_data(most_popular_json: list[dict]) -> list[tuple]:
     data_for_database = []
     for show_data in most_popular_json:
         show_values = list(show_data.values())  # dict values is now an object that is almost a list, lets make it one
@@ -125,7 +128,7 @@ def prepare_top_250_data(most_popular_json:list[dict]) ->list[tuple]:
 
 
 def make_zero_values() -> list[dict]:
-    '''this is a kludge to deal with the fact that one record has no ratings data'''
+    """this is a kludge to deal with the fact that one record has no ratings data"""
     zero_rating = []
     for rating_value in range(10, 0, -1):
         rating = {}
