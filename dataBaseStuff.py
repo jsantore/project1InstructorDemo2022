@@ -113,17 +113,16 @@ def create_all_tables(db_cursor: sqlite3.Cursor):
     create_most_pop_movie_table(db_cursor)
 
 
-def put_top_250_in_database(table:str, data_to_add: list[tuple], db_cursor: sqlite3.Cursor):
+def put_top_250_in_database(table: str, data_to_add: list[tuple], db_cursor: sqlite3.Cursor):
     db_cursor.executemany(f"""INSERT INTO {table}(ttid, rank, title, fulltitle, year, image_url, crew, imdb_rating,
     imdb_rating_count)
     VALUES(?,?,?,?,?,?,?,?,?)""", data_to_add)
 
 
-def put_most_popular_in_database(table:str, data_to_add: list[tuple], db_cursor: sqlite3.Cursor):
+def put_most_popular_in_database(table: str, data_to_add: list[tuple], db_cursor: sqlite3.Cursor):
     db_cursor.executemany(f"""INSERT INTO {table}(ttid, rank, rankchange, title, fulltitle, year, image_url, crew, rating,
     ratingcount)
     VALUES(?,?,?,?,?,?,?,?,?, ?)""", data_to_add)
-
 
 
 def put_in_wheel_of_time(db_cursor: sqlite3.Cursor):
